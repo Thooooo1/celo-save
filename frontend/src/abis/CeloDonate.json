@@ -1,0 +1,15 @@
+[
+  {
+    "type": "function",
+    "name": "donate",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "donatedAmount",
+    "inputs": [{ "name": "address", "type": "address" }],
+    "outputs": [{ "name": "", "type": "uint256" }]
+  }
+]

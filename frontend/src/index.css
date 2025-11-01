@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tùy chọn: thêm hiệu ứng nền nhẹ */
+body {
+  background: linear-gradient(135deg, #e0ffe5 0%, #fffde1 100%);
+  font-family: "Inter", sans-serif;
+}
