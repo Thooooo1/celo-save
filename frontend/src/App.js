@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import "./index.css";
-import CeloDonate from "./abis/CeloDonate.json";
+import CONTRACT_ABI from "./CeloDonateABI"; // ✅ dùng file ABI riêng đã tạo
 
 import { motion } from "framer-motion";
 import {
@@ -15,9 +15,8 @@ import {
 } from "recharts";
 import "./App.css";
 
-// 🧾 Địa chỉ contract bạn đã deploy trên Alfajores
+// 🧾 Địa chỉ contract của bạn (thay đúng địa chỉ mới nhất bạn deploy)
 const CONTRACT_ADDRESS = "0xA248Bb13c14EA06aC8f64d14E96060c59f401b55";
-const CONTRACT_ABI = CeloDonate.abi;
 
 function App() {
   const [account, setAccount] = useState(null);
@@ -28,52 +27,14 @@ function App() {
   const [donors, setDonors] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // 🧩 Kết nối MetaMask & chuyển mạng sang Alfajores
+  // 🧩 Kết nối MetaMask
   const connectWallet = async () => {
-    if (!window.ethereum) {
-      alert("⚠️ Vui lòng cài đặt MetaMask!");
-      return;
-    }
-
-    // ✅ Kiểm tra và chuyển mạng
-    const celoChainId = "0xaef3"; // 44787
     try {
-      const chainId = await window.ethereum.request({ method: "eth_chainId" });
-      if (chainId !== celoChainId) {
-        try {
-          await window.ethereum.request({
-            method: "wallet_switchEthereumChain",
-            params: [{ chainId: celoChainId }],
-          });
-        } catch (switchError) {
-          if (switchError.code === 4902) {
-            await window.ethereum.request({
-              method: "wallet_addEthereumChain",
-              params: [
-                {
-                  chainId: celoChainId,
-                  chainName: "Celo Alfajores Testnet",
-                  nativeCurrency: {
-                    name: "CELO",
-                    symbol: "CELO",
-                    decimals: 18,
-                  },
-                  rpcUrls: ["https://alfajores-forno.celo-testnet.org"],
-                  blockExplorerUrls: ["https://alfajores.celoscan.io/"],
-                },
-              ],
-            });
-          } else throw switchError;
-        }
+      if (!window.ethereum) {
+        alert("⚠️ Vui lòng cài đặt MetaMask trước!");
+        return;
       }
-    } catch (err) {
-      console.error("⚠️ Lỗi khi kiểm tra/chuyển mạng:", err);
-      alert("Không thể chuyển sang mạng Celo Alfajores.");
-      return;
-    }
 
-    // ✅ Kết nối ví
-    try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const accounts = await provider.send("eth_requestAccounts", []);
       const signer = await provider.getSigner();
@@ -86,7 +47,6 @@ function App() {
       setProvider(provider);
       setAccount(accounts[0]);
       setContract(contract);
-      await loadStats(contract);
     } catch (err) {
       console.error("❌ Lỗi khi kết nối ví:", err);
       alert("Không thể kết nối ví. Hãy thử lại.");
@@ -95,10 +55,11 @@ function App() {
 
   // 💰 Gửi tiền quyên góp
   const donate = async () => {
-    if (!amount || isNaN(amount)) {
-      alert("⚠️ Nhập số CELO hợp lệ!");
+    if (!amount || isNaN(amount) || Number(amount) <= 0) {
+      alert("⚠️ Vui lòng nhập số CELO hợp lệ!");
       return;
     }
+
     try {
       setLoading(true);
       const tx = await contract.donate({
@@ -106,28 +67,26 @@ function App() {
       });
       await tx.wait();
       setAmount("");
-      await loadStats(contract);
+      await loadStats();
       alert("🎉 Cảm ơn bạn đã quyên góp!");
     } catch (err) {
-      console.error(err);
-      alert("❌ Giao dịch thất bại!");
+      console.error("❌ Lỗi khi quyên góp:", err);
+      alert("Giao dịch thất bại!");
     } finally {
       setLoading(false);
     }
   };
 
-  // 📊 Lấy thống kê
-  const loadStats = async (c) => {
-    const ct = c || contract;
-    if (!ct) return;
-
+  // 📊 Lấy thống kê người quyên góp
+  const loadStats = async () => {
+    if (!contract) return;
     try {
-      const total = await ct.getTotalDonations();
-      const count = await ct.getDonorCount();
+      const total = await contract.getTotalDonations();
+      const count = await contract.getDonorCount();
 
-      let donorData = [];
+      const donorData = [];
       for (let i = 0; i < count; i++) {
-        const [addr, value] = await ct.getDonorAt(i);
+        const [addr, value] = await contract.getDonorAt(i);
         donorData.push({
           name: addr.slice(0, 6) + "..." + addr.slice(-4),
           amount: Number(ethers.formatEther(value)),
@@ -137,10 +96,11 @@ function App() {
       setTotal(ethers.formatEther(total));
       setDonors(donorData);
     } catch (err) {
-      console.error("Lỗi khi tải dữ liệu:", err);
+      console.error("⚠️ Lỗi khi tải dữ liệu thống kê:", err);
     }
   };
 
+  // 🔁 Tự động load stats khi contract sẵn sàng
   useEffect(() => {
     if (contract) loadStats();
   }, [contract]);
