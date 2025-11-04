@@ -1,66 +1,74 @@
-## Foundry
+# 🪙 CeloDonate Pro
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+**CeloDonate Pro** là một ứng dụng phi tập trung (dApp) được xây dựng trên **mạng Celo Sepolia Testnet**, cho phép người dùng **kết nối ví MetaMask và thực hiện quyên góp minh bạch bằng token CELO**.  
+Dự án minh họa quy trình xây dựng một hệ thống quyên góp trên blockchain — nơi mọi giao dịch đều được ghi lại công khai và không thể chỉnh sửa.
 
-Foundry consists of:
+---
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+## 👩‍💻 Thành viên thực hiện
 
-## Documentation
+- **Nguyễn Anh Thơ**
+- **Nguyễn Thị Dung**
 
-https://book.getfoundry.sh/
+---
 
-## Usage
+## 🎯 Mục tiêu dự án
 
-### Build
+Mục tiêu chính của **CeloDonate Pro** là:
 
-```shell
-$ forge build
-```
+- Tạo ra một nền tảng quyên góp minh bạch trên blockchain Celo.
+- Giúp người dùng dễ dàng quyên góp CELO trực tiếp từ ví MetaMask.
+- Đảm bảo rằng toàn bộ giao dịch được ghi lại công khai, có thể xác minh qua block explorer.
+- Minh họa quy trình xây dựng và triển khai **smart contract + frontend React** kết nối ví blockchain.
 
-### Test
+Dự án hướng tới việc **ứng dụng Web3** trong lĩnh vực **minh bạch tài chính từ thiện** — giúp giảm gian lận, tăng niềm tin và cho phép người quyên góp theo dõi các khoản đóng góp của mình.
 
-```shell
-$ forge test
-```
+---
 
-### Format
+## ⚙️ Công nghệ sử dụng
 
-```shell
-$ forge fmt
-```
+| Thành phần                       | Công nghệ / Công cụ                                                        |
+| -------------------------------- | -------------------------------------------------------------------------- |
+| **Ngôn ngữ hợp đồng thông minh** | Solidity                                                                   |
+| **Triển khai Smart Contract**    | Foundry                                                                    |
+| **Frontend**                     | ReactJS                                                                    |
+| **Thư viện Web3**                | Ethers.js v6                                                               |
+| **Ví**                           | MetaMask                                                                   |
+| **Mạng blockchain**              | Celo Sepolia Testnet                                                       |
+| **RPC Provider**                 | `https://forno.celo-sepolia.celo-testnet.org`                              |
+| **Block Explorer**               | [https://celo-sepolia.blockscout.com](https://celo-sepolia.blockscout.com) |
 
-### Gas Snapshots
+---
 
-```shell
-$ forge snapshot
-```
+## 🧠 Ý tưởng & Nguyên lý hoạt động
 
-### Anvil
+**CeloDonate Pro** hoạt động như sau:
 
-```shell
-$ anvil
-```
+1. **Kết nối ví MetaMask:**  
+   Ứng dụng tự động yêu cầu người dùng kết nối ví MetaMask và chuyển sang mạng **Celo Sepolia Testnet**. Nếu mạng chưa tồn tại, hệ thống sẽ đề xuất thêm tự động.
 
-### Deploy
+2. **Giao diện quyên góp:**  
+   Người dùng nhập số lượng CELO muốn ủng hộ (ví dụ `0.01 CELO`), sau đó nhấn **Gửi**.
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
+3. **Thực thi giao dịch:**  
+   Ứng dụng tạo giao dịch thông qua **Ethers.js** và gửi đến smart contract đã triển khai trên blockchain.  
+   Giao dịch được xác nhận công khai qua block explorer.
 
-### Cast
+4. **Theo dõi kết quả:**  
+   Sau khi hoàn tất, người dùng nhận thông báo giao dịch thành công và có thể kiểm tra trực tiếp trên block explorer.
 
-```shell
-$ cast <subcommand>
-```
+---
 
-### Help
+## 💡 Chi tiết kỹ thuật Smart Contract
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
+Smart contract `CeloDonate.sol` được viết bằng **Solidity** với hai hàm chính:
+
+```solidity
+function donate() public payable {
+    // Cho phép người dùng gửi CELO tới contract
+}
+
+function donatedAmount(address user) public view returns (uint256) {
+    // Trả về tổng số CELO mà người dùng đã quyên góp
+}
 ```
